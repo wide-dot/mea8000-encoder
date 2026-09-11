@@ -110,6 +110,42 @@ def _lane(title, inner, width, height, y_labels):
             f'<rect width="{width}" height="{height}" fill="#1b1b1b"/>{inner}{labels}</svg></div>')
 
 
+# ----------------------------------------------------------------- resonators
+
+FM_COLORS = ("#ff9f43", "#6ee06e", "#5bd0ff")
+BW_WIDTH = {0: 3.5, 1: 2.5, 2: 1.6, 3: 1.0}     # 726, 309, 125, 50 Hz
+
+
+def _resonator_overlay(utts: list[Utterance], dur: float, scale: float) -> str:
+    """The three formants of every frame as ramps over the chip's spectrogram: the chip
+    interpolates from the previous frame's values to the new ones over the frame, so each
+    frame is a straight segment; the first frame of a file is preset (flat). Silent frames
+    break the traces. Frequencies are those the chip renders at its clock (tables / scale),
+    on the recording's time axis (viewBox: seconds by Hz, 4 kHz at the top)."""
+    from . import tables as T
+    from .encoder import FM_TABLES
+
+    lines = []
+    t = 0.0
+    for u in utts:
+        prev = None
+        for f in u.frames[:-1]:
+            length = (1 << f.fd) * HOP / RATE * scale
+            fm = tuple(FM_TABLES[g][f.fm[g]] / scale for g in range(3))
+            if f.ampl == 0:
+                prev = None
+                t += length
+                continue
+            start = prev if prev is not None else fm
+            for g in range(3):
+                lines.append(f'<line x1="{t:.4f}" y1="{4000 - start[g]:.0f}" x2="{t + length:.4f}" y2="{4000 - fm[g]:.0f}" '
+                             f'stroke="{FM_COLORS[g]}" stroke-width="{BW_WIDTH[f.bw[g]]}" vector-effect="non-scaling-stroke"/>')
+            prev = fm
+            t += length
+    return (f'<svg id="resonators" viewBox="0 0 {dur:.4f} 4000" preserveAspectRatio="none" opacity="0.85">'
+            + "".join(lines) + "</svg>")
+
+
 # ----------------------------------------------------------------- the page
 
 def write_report(page: Path, source_wav: Path, chip_wav: Path, source_name: str, prepared,
@@ -149,6 +185,7 @@ def write_report(page: Path, source_wav: Path, chip_wav: Path, source_name: str,
     ft = np.arange(len(pitch)) * (HOP / RATE) * scale
     pitch = np.array(pitch, float)
     voiced = np.array(voiced, bool)
+    resonators = _resonator_overlay(utts, dur, scale)
 
     W, H = 1200, 110
     lanes = []
@@ -175,7 +212,9 @@ def write_report(page: Path, source_wav: Path, chip_wav: Path, source_name: str,
 <style>
 body{{font-family:system-ui,sans-serif;background:#111;color:#ddd;margin:0;padding:16px 24px}}
 h1{{font-size:18px;margin:0 0 8px}} h2{{font-size:14px;margin:18px 0 6px;color:#aaa}}
-.spec img{{width:100%;height:220px;image-rendering:pixelated;display:block}}
+.spec{{position:relative}} .spec img{{width:100%;height:220px;image-rendering:pixelated;display:block}}
+.spec svg{{position:absolute;left:0;top:0;width:100%;height:220px;pointer-events:none}}
+.toggle{{font-size:12px;font-weight:normal;color:#aaa;margin-left:12px}} .toggle input{{vertical-align:middle}}
 .title{{font-size:12px;color:#aaa;margin:8px 0 2px}} .lane{{margin-bottom:4px}}
 table{{border-collapse:collapse;font-size:13px}} td,th{{border:1px solid #333;padding:2px 8px;text-align:left}}
 .ab button{{font-size:14px;padding:4px 10px;margin-right:8px}} audio{{vertical-align:middle}}
@@ -191,7 +230,9 @@ table{{border-collapse:collapse;font-size:13px}} td,th{{border:1px solid #333;pa
 <span style="font-size:12px;color:#888">&nbsp; TAB while playing switches A/B at the same position · the same sounds as {html.escape(source_wav.name)} and {html.escape(chip_wav.name)} beside this page</span>
 </div>
 <h2>The recording, after the filters</h2><div class="spec"><img src="{_img(spectrogram_rgb(x8))}" alt="spectrogram of the recording, 0-4 kHz"></div>
-<h2>The chip</h2><div class="spec"><img src="{_img(spectrogram_rgb(y8))}" alt="spectrogram of the chip's rendering, 0-4 kHz"></div>
+<h2>The chip <label class="toggle"><input type="checkbox" id="res" checked onchange="document.getElementById('resonators').style.display=this.checked?'':'none'"> resonators
+ <span style="color:{FM_COLORS[0]}">FM1</span> <span style="color:{FM_COLORS[1]}">FM2</span> <span style="color:{FM_COLORS[2]}">FM3</span>, thicker = wider bandwidth</label></h2>
+<div class="spec"><img src="{_img(spectrogram_rgb(y8))}" alt="spectrogram of the chip's rendering, 0-4 kHz">{resonators}</div>
 {''.join(lanes)}
 <h2>Speech files</h2>
 <table><tr><th>#</th><th>starts at (s)</th><th>starting pitch (Hz)</th><th>frames</th><th>duration (s)</th></tr>{files_rows}</table>

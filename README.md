@@ -16,7 +16,8 @@ mea8000 encode samples/fr-female.wav fr-female.mea --report
 
 `fr-female.mea` is the speech data. `fr-female.html` opens in a browser: the recording
 and the chip's rendering side by side, with a button to play each (TAB switches while
-playing), the pitch, level and voicing lanes, and the frames. Beside it,
+playing), the chip's resonators drawn over its spectrogram, the pitch, level and voicing
+lanes, and the frames. Beside it,
 `fr-female-source.wav` is the recording as the encoder saw it (one channel, normalized,
 the silence around the speech dropped — see the profile) and `fr-female-chip.wav` the
 rendering alone.
