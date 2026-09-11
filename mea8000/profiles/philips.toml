@@ -1,0 +1,10 @@
+# Philips' reference: the chip at 3.84 MHz (Technical Publication 101), no compensation.
+clock_hz = 3840000
+format = "speech"
+pitch = "local"
+frame_ms = 8
+quality = "best"
+channel = "left"
+highpass_hz = 0
+normalize = true
+trim = true

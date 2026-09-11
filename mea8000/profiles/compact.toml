@@ -1,0 +1,11 @@
+# Thomson, the smallest files: one speech file for the whole recording, frames lengthened
+# wherever the result stays intelligible (about 40 % of the bytes of "best").
+clock_hz = 4000000
+format = "speech"
+pitch = "global"
+frame_ms = 8
+quality = "compact"
+channel = "left"
+highpass_hz = 0
+normalize = true
+trim = true

@@ -1,0 +1,44 @@
+[project]
+name = "mea8000-encoder"
+version = "0.1.0"
+description = "A recording in, MEA8000 speech data out, with a preview of what the chip will say"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE", "THIRD_PARTY.md"]
+requires-python = ">=3.12"
+authors = [{ name = "wide-dot" }]
+keywords = ["MEA8000", "speech synthesis", "Thomson", "6809", "retro"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Topic :: Multimedia :: Sound/Audio :: Speech",
+    "Topic :: System :: Emulators",
+]
+dependencies = ["numpy>=2.0", "scipy>=1.14"]
+
+[project.optional-dependencies]
+fast = ["numba>=0.60"]
+dev = ["pytest>=8"]
+
+[project.urls]
+Repository = "https://github.com/wide-dot/mea8000-encoder"
+Documentation = "https://github.com/wide-dot/mea8000-encoder#readme"
+
+[project.scripts]
+mea8000 = "mea8000.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["mea8000*"]
+
+[tool.setuptools.package-data]
+mea8000 = ["profiles/*.toml"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,0 +1,2 @@
+# the tests need the samples, which are not in the package: repository only
+prune tests

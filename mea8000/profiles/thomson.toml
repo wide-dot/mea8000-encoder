@@ -1,0 +1,21 @@
+# Thomson TO7/70, TO8, TO9, MO5, MO6 with the Cedic-Nathan speech box (the default).
+clock_hz = 4000000       # the box clocks the chip at 4 MHz: everything would play 4.2 %
+                         # faster and higher than Philips' 3.84 MHz reference; the encoder
+                         # compensates so that the machine says what the recording says
+format = "speech"        # "speech": speech files one after the other; "vocabulary": an
+                         # image with an offset table, each file reachable by its number
+pitch = "local"          # "local": a starting pitch per word group, each its own speech
+                         # file; "global": one for the whole recording, gliding through
+                         # the pauses, in a single speech file
+frame_ms = 8             # the shortest frame allowed: 8 (the chip's finest), 16, 32, 64
+quality = "best"         # how much degradation is accepted to lengthen frames beyond
+                         # frame_ms: "best" none, "balanced" a little (about 40 % fewer
+                         # bytes), "compact" what stays intelligible (about 60 % fewer)
+channel = "left"         # which channel of a stereo recording: "left", "right", "mix"
+highpass_hz = 0          # a high-pass on the recording before analysis (80-150 removes
+                         # rumble and kick drums); 0: none
+normalize = true         # scale the recording so that its loudest sample reaches full
+                         # scale (the chip's amplitude codes are absolute: a quiet
+                         # recording would come out as silence)
+trim = true              # drop the silence before the first sound and after the last
+                         # (they would cost silent frames and a wait before the word)
