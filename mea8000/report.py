@@ -112,7 +112,7 @@ def _lane(title, inner, width, height, y_labels):
 
 # ----------------------------------------------------------------- resonators
 
-FM_COLORS = ("#ff9f43", "#6ee06e", "#5bd0ff")
+FM_COLORS = ("#5bd0ff", "#6ee06e", "#ffffff")    # readable over the orange of the spectrogram
 BW_WIDTH = {0: 3.5, 1: 2.5, 2: 1.6, 3: 1.0}     # 726, 309, 125, 50 Hz
 
 
@@ -138,11 +138,13 @@ def _resonator_overlay(utts: list[Utterance], dur: float, scale: float) -> str:
                 continue
             start = prev if prev is not None else fm
             for g in range(3):
-                lines.append(f'<line x1="{t:.4f}" y1="{4000 - start[g]:.0f}" x2="{t + length:.4f}" y2="{4000 - fm[g]:.0f}" '
-                             f'stroke="{FM_COLORS[g]}" stroke-width="{BW_WIDTH[f.bw[g]]}" vector-effect="non-scaling-stroke"/>')
+                seg = f'x1="{t:.4f}" y1="{4000 - start[g]:.0f}" x2="{t + length:.4f}" y2="{4000 - fm[g]:.0f}" vector-effect="non-scaling-stroke"'
+                # a dark halo under the trace keeps it readable whatever the spectrogram's colour
+                lines.append(f'<line {seg} stroke="#000" stroke-opacity="0.55" stroke-width="{BW_WIDTH[f.bw[g]] + 2.5}"/>'
+                             f'<line {seg} stroke="{FM_COLORS[g]}" stroke-width="{BW_WIDTH[f.bw[g]]}"/>')
             prev = fm
             t += length
-    return (f'<svg id="resonators" viewBox="0 0 {dur:.4f} 4000" preserveAspectRatio="none" opacity="0.85">'
+    return (f'<svg id="resonators" viewBox="0 0 {dur:.4f} 4000" preserveAspectRatio="none" opacity="0.9">'
             + "".join(lines) + "</svg>")
 
 
